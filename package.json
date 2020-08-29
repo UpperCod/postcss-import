@@ -1,7 +1,7 @@
 {
-    "name": "pkg_name",
-    "version": "0.0.0",
-    "description": "Capture text fragments based on regular expressions that are executed for each line of the text",
+    "name": "@uppercod/postcss-import",
+    "version": "1.0.0",
+    "description": "resolves the `@import` and creates the `tree` property in the result object, which defines the imports",
     "main": "./cjs/index.js",
     "module": "./esm/index.js",
     "publishConfig": {
@@ -15,21 +15,28 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/UpperCod/pkg_name.git"
+        "url": "git+https://github.com/UpperCod/postcss-import.git"
     },
     "author": "UpperCod",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/UpperCod/pkg_name/issues"
+        "url": "https://github.com/UpperCod/postcss-import/issues"
     },
-    "homepage": "https://github.com/UpperCod/pkg_name#readme",
-    "dependencies": {},
+    "homepage": "https://github.com/UpperCod/postcss-import#readme",
+    "dependencies": {
+        "@uppercod/cache": "^1.0.0",
+        "@uppercod/imported": "^1.2.0",
+        "@uppercod/request": "^1.1.1",
+        "postcss": "^7.0.32",
+        "resolve-css": "^1.0.2"
+    },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^8.1.0",
         "ava": "^3.10.1",
         "builtin-modules": "^3.1.0",
         "esm": "^3.2.25",
-        "rollup": "^2.21.0"
+        "rollup": "^2.21.0",
+        "tailwindcss": "^1.7.6"
     },
     "typings": "types.d.ts",
     "ava": {
