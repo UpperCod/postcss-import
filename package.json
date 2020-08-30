@@ -1,6 +1,6 @@
 {
     "name": "@uppercod/postcss-import",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "resolves the `@import` and creates the `tree` property in the result object, which defines the imports",
     "main": "./cjs/index.js",
     "module": "./esm/index.js",
@@ -28,7 +28,7 @@
         "@uppercod/imported": "^1.2.0",
         "@uppercod/request": "^1.1.1",
         "postcss": "^7.0.32",
-        "resolve-css": "^1.0.2"
+        "resolve-css": "^1.0.3"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^8.1.0",
@@ -48,10 +48,8 @@
         ]
     },
     "exports": {
-        "./": {
-            "import": "./ems/",
-            "require": "./cjs/"
-        }
+        "import": "./ems/index.js",
+        "require": "./cjs/index.js"
     },
     "prettier": {
         "tabWidth": 4,
