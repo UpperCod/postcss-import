@@ -1,99 +1,101 @@
 import path from "path";
-import { readFile } from "fs/promises";
+import fs from "fs/promises";
 import createTree from "@uppercod/imported";
 import { request } from "@uppercod/request";
-import createCache from "@uppercod/cache";
 import postcss from "postcss";
-import { isUrl } from "./utils";
 import resolveCss from "resolve-css";
+import { isUrl } from "./utils";
+import pluginRules from "./plugin-rules";
 
-const cache = createCache();
-/**
- *
- * @param {options} [options]
- * @param {parallel} [parallel]
- * @returns {import("postcss").Transformer}
- */
-export default function pluginImport(options, parallel = {}) {
-    options = {
-        ...{
-            tree: createTree(),
-            readFile: (src) => readFile(src, "utf-8"),
-        },
-        ...options,
-    };
-    return (root, result) => {
+const cache = {
+    request: {},
+    process: {},
+};
+
+const readFile = (file) => fs.readFile(file, "utf8");
+
+const forCache = (src) => isUrl(src) || /node_modules/.test(src);
+
+const pluginImport = postcss.plugin("plugin-import", (tree = createTree()) => {
+    return async (root, result) => {
         const file = result.opts.from;
         //@ts-ignore
-        result.tree = options.tree;
-        return transformer(options, root, file, parallel);
-    };
-}
-/**
- *
- * @param {options} options
- * @param {import("postcss").Root} root
- * @param {string} file
- * @param {parallel} parallel
- */
-function transformer(options, root, file, parallel) {
-    const imports = [];
-    const { dir } = path.parse(file);
-    const mapImport = async (atrule) => {
-        const { params, parent } = atrule;
-        parallel[file] = parallel[file] || {};
+        result.tree = tree;
 
-        if (parallel[file][params]) {
-            atrule.remove();
-            return;
-        } else {
-            parallel[file][params] = true;
-        }
+        const imports = [];
+        const context = {};
 
-        const test = params.match(
-            /(?:url\(){0,1}(?:"([^\"]+)"|'([^\']+)')(?:\)){0,1}\s*(.*)/
+        root.walkAtRules("import", (atrule) =>
+            imports.push(loadImport(file, tree, atrule, context))
         );
-        if (test) {
-            const [, src1, src2, media] = test;
-            let nextSrc = src1 || src2;
-            let nextContent;
-            if (isUrl(nextSrc)) {
-                [nextSrc, nextContent] = await cache(request, nextSrc);
-            } else {
-                [nextSrc, nextContent] = await resolveCss(
-                    options.readFile,
-                    nextSrc,
-                    dir
-                );
-                options.tree.addChild(file, nextSrc);
-            }
 
-            let {
-                root: { nodes },
-            } = await postcss([pluginImport(options, parallel)]).process(
-                nextContent,
-                {
-                    from: nextSrc,
-                }
-            );
+        await Promise.all(imports);
 
-            if (media) {
-                parent.insertAfter(
-                    atrule,
-                    postcss.atRule({ name: "media", params: media, nodes })
-                );
-            } else {
-                parent.insertAfter(atrule, nodes);
-            }
+        if (!Object.keys(context).length) return;
 
-            atrule.remove();
-        }
+        root.walkAtRules("extend", (atrule) => {
+            const nodes = atrule.params
+                .split(/\s*,\s*/)
+                .map((index) => context[index] || [])
+                .flat();
+
+            atrule.replaceWith(nodes);
+        });
     };
+});
 
-    root.walkAtRules("import", (atrule) => imports.push(mapImport(atrule)));
+async function loadImport(file, tree, atrule, context) {
+    const { dir } = path.parse(file);
+    const { params, parent } = atrule;
+    const test = params.match(
+        /(?:url\(){0,1}(?:"([^\"]+)"|'([^\']+)')(?:\)){0,1}\s*(.*)/
+    );
 
-    return Promise.all(imports);
+    if (!test) return;
+
+    const [, src1, src2, media = ""] = test;
+
+    let src = src1 || src2;
+    let css;
+
+    const testAs = media.match(/\(\s*as\s*:\s*(\w+)\s*\)/);
+
+    if (isUrl(src)) {
+        cache.request[src] = cache.request[src] || request(src);
+        [src, css] = await cache.request[src];
+    } else {
+        [src, css] = await resolveCss(readFile, src, dir);
+        tree.addChild(file, src);
+    }
+
+    const plugins = [pluginImport(tree)];
+
+    if (testAs) {
+        const [, space] = testAs;
+        plugins.push(pluginRules(space, context));
+    }
+
+    let {
+        root: { nodes },
+    } = await postcss(plugins).process(css, {
+        from: src,
+    });
+
+    if (!testAs) {
+        if (media) {
+            parent.insertAfter(
+                atrule,
+                postcss.atRule({ name: "media", params: media, nodes })
+            );
+        } else {
+            parent.insertAfter(atrule, nodes);
+        }
+    }
+
+    atrule.remove();
 }
+
+export default pluginImport;
 
 /**
  * @typedef {Object} options
