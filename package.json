@@ -24,7 +24,7 @@
     },
     "homepage": "https://github.com/UpperCod/postcss-import#readme",
     "dependencies": {
-        "@uppercod/cache": "^1.0.0",
+        "@uppercod/get-prop": "^1.0.1",
         "@uppercod/imported": "^1.2.0",
         "@uppercod/request": "^1.1.1",
         "postcss": "^7.0.32",

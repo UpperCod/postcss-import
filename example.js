@@ -4,8 +4,14 @@ import pluginImport from "./src";
 postcss([pluginImport()])
     .process(
         `
-@import "https://gist.githubusercontent.com/UpperCod/a685f64487fe5713cccefe54ad3bfa58/raw/b20812fb82dcc18ace8a40c79296742f7281fe4d/file.css";
-:root{color:black;@extend v2.b, v2.b:hover}
+@import "https://gist.githubusercontent.com/UpperCod/a685f64487fe5713cccefe54ad3bfa58/raw/523f1adfa8713c79c93bffb8ed446f89670ae7a3/file.css" (as:a);
+@import "https://gist.githubusercontent.com/UpperCod/a685f64487fe5713cccefe54ad3bfa58/raw/523f1adfa8713c79c93bffb8ed446f89670ae7a3/file.css" (as:b);
+@import "https://gist.githubusercontent.com/UpperCod/a685f64487fe5713cccefe54ad3bfa58/raw/523f1adfa8713c79c93bffb8ed446f89670ae7a3/file.css" (as:c);
+@import "https://gist.githubusercontent.com/UpperCod/a685f64487fe5713cccefe54ad3bfa58/raw/523f1adfa8713c79c93bffb8ed446f89670ae7a3/file.css" (as:d);
+:root{color:black;@extend a.body}
+:root{color:black;@extend b.body}
+:root{color:black;@extend c.body}
+:root{color:black;@extend d.body}
 `,
         { from: "index.css" }
     )
