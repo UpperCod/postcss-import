@@ -27,12 +27,12 @@ postcss([pluginImport()]).process(`@import "http://unpkg.com/example.css";`, {
 
 ## import as
 
-Esta es una caracteristica especial de postcss-import, permite asociar la importacion a un grupo, para ser asociada a base de ese grupo a otras reglas, eg:
+special feature of this plugin that allows associating the import to a group, to be associated based on that group with other rules, eg:
 
 ```scss
 @import "https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css" (as: bulma);
 
 .button {
-    @extend bulma.button bulma.is-dark;
+    @extend bulma.button, bulma.is-dark;
 }
 ```
