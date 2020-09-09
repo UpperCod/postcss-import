@@ -2,11 +2,10 @@
 
 resolves the `@import` and creates the `tree` property in the result object, which defines the imports.
 
-Differences by [postcss-import](https://github.com/postcss/postcss-import):
-
-1.  This plugin can belong to the bundle.
-2.  This plugin imports css from url.
-3.  The resolution are local so you must point to the css file if you import a package you must associate the physical directory of the css.
+1. Import and know the imports associated with the CSS.
+2. [Group the import under an alias to compose CSS](#group-the-import-under-an-alias-to-compose-css).
+3. [Optimize parallel import](#optimization).
+4. Consume CSS from URL.
 
 ## Install
 
@@ -64,7 +63,7 @@ postcss([pluginImport(cache)]).process(`@import "./file.css";`, {
 
 The import plugin will run only once for the file `file.css`.
 
-## Import as
+## Group the import under an alias to compose CSS.
 
 special feature of this plugin that allows associating the import to a group, to be associated based on that group with other rules, eg:
 
