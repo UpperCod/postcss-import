@@ -1,5 +1,9 @@
 import postcss from "postcss";
 
+/**
+ *
+ * @param {any} rule
+ */
 function insideAtrule(rule) {
     while ((rule = rule.parent)) {
         if (rule.type == "atrule") return true;

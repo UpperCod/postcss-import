@@ -1,6 +1,6 @@
 {
     "name": "@uppercod/postcss-import",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "resolves the `@import` and creates the `tree` property in the result object, which defines the imports",
     "main": "./cjs/index.js",
     "module": "./esm/index.js",
@@ -24,8 +24,6 @@
     },
     "homepage": "https://github.com/UpperCod/postcss-import#readme",
     "dependencies": {
-        "@uppercod/get-prop": "^1.0.1",
-        "@uppercod/imported": "^1.2.0",
         "@uppercod/request": "^1.1.1",
         "postcss": "^7.0.32",
         "resolve-css": "^1.0.3"
