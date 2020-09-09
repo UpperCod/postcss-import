@@ -21,8 +21,8 @@ declare module "@uppercod/postcss-import" {
     }
 
     export interface Options {
-        imports: Imports;
-        process: Process;
+        imports?: Imports;
+        process?: Process;
     }
     export default function pluginImport(options?: Options): Transformer;
 }
