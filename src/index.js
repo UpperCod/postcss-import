@@ -13,34 +13,41 @@ const cache = {
 
 const readFile = (file) => fs.readFile(file, "utf8");
 
-const pluginImport = postcss.plugin("plugin-import", (loaded = {}) => {
-    return async (root, result) => {
-        const file = result.opts.from;
+const pluginImport = postcss.plugin(
+    "plugin-import",
+    /**
+     * @param {loaded} loaded
+     */
+    (loaded) => {
+        loaded = { imports: {}, process: {}, ...loaded };
+        return async (root, result) => {
+            const file = result.opts.from;
 
-        /**@type {Promise<void>[]} */
-        const imports = [];
+            /**@type {Promise<void>[]} */
+            const imports = [];
 
-        /**@type {context} */
-        const spaces = {};
+            /**@type {context} */
+            const spaces = {};
 
-        root.walkAtRules("import", (atrule) =>
-            imports.push(loadImport(file, loaded, atrule, spaces))
-        );
+            root.walkAtRules("import", (atrule) =>
+                imports.push(loadImport(file, loaded, atrule, spaces))
+            );
 
-        await Promise.all(imports);
+            await Promise.all(imports);
 
-        if (!Object.keys(spaces).length) return;
+            if (!Object.keys(spaces).length) return;
 
-        root.walkAtRules("extend", (atrule) => {
-            const nodes = atrule.params
-                .split(/\s*,\s*/)
-                .map((index) => spaces[index] || [])
-                .flat();
+            root.walkAtRules("extend", (atrule) => {
+                const nodes = atrule.params
+                    .split(/\s*,\s*/)
+                    .map((index) => spaces[index] || [])
+                    .flat();
 
-            atrule.replaceWith(nodes.map((decl) => decl.clone()));
-        });
-    };
-});
+                atrule.replaceWith(nodes.map((decl) => decl.clone()));
+            });
+        };
+    }
+);
 /**
  *
  * @param {string} file
@@ -75,13 +82,17 @@ async function loadImport(file, loaded, atrule, spaces) {
     let resolve;
 
     let useProcess = () => process(src, css, loaded);
-
+    /**
+     * Execute a higher scope cache if the resource is static
+     * whether it is from node_modules or a url
+     */
     if (!local || /node_modules/.test(src)) {
         cache.process[src] = cache.process[src] || useProcess();
         resolve = cache.process[src];
     } else {
-        loaded[src] = loaded[src] || useProcess();
-        resolve = loaded[src];
+        loaded.process[src] = loaded.process[src] || useProcess();
+        loaded.imports[src] = true;
+        resolve = loaded.process[src];
     }
 
     const { nodes, context } = await resolve;
@@ -114,7 +125,7 @@ async function loadImport(file, loaded, atrule, spaces) {
  * @param {string} src
  * @param {string} css
  * @param {loaded} loaded
- * @returns {loadProcess}
+ * @returns {process}
  */
 const process = async (src, css, loaded) => {
     /**
@@ -144,11 +155,13 @@ export default pluginImport;
  */
 
 /**
- * @typedef {Promise<{nodes:nodes,context:context}>} loadProcess
+ * @typedef {Promise<{nodes:nodes,context:context}>} process
  */
 
 /**
- * @typedef {Object<string,loadProcess>} loaded
+ * @typedef {Object} loaded
+ * @property {Object<string,boolean>} imports - It allows to capture the executed local imports
+ * @property {Object<string,process>} process - Cache local processes, the process object can be shared between multiple instances
  */
 
 /**

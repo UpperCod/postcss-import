@@ -14,7 +14,7 @@ Differences by [postcss-import](https://github.com/postcss/postcss-import):
 npm install @uppercod/postcss-import
 ```
 
-## usage
+## Usage
 
 ```js
 import postcss from "postcss";
@@ -25,7 +25,46 @@ postcss([pluginImport()]).process(`@import "http://unpkg.com/example.css";`, {
 });
 ```
 
-## import as
+## Options
+
+The options are parameters that are mutable by the process that optimize the execution of this plugin, the plugin internally has a cache system to avoid multiple executions of postcss,
+to improve performance you can share this cache.
+
+```js
+pluginImport({
+    /**
+     * Cache local processes, the process object can be
+     * shared between multiple instances
+     */
+    process: {},
+    /**
+     * Stores the paths of the local files imported by the process
+     */
+    imports: {},
+});
+```
+
+## Optimization
+
+```js
+const cache = {};
+
+postcss([pluginImport(cache)]).process(`@import "./file.css";`, {
+    from: "a.css",
+});
+
+postcss([pluginImport(cache)]).process(`@import "./file.css";`, {
+    from: "b.css",
+});
+
+postcss([pluginImport(cache)]).process(`@import "./file.css";`, {
+    from: "c.css",
+});
+```
+
+The import plugin will run only once for the file `file.css`.
+
+## Import as
 
 special feature of this plugin that allows associating the import to a group, to be associated based on that group with other rules, eg:
 
