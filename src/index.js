@@ -4,7 +4,7 @@ import { request } from "@uppercod/request";
 import postcss from "postcss";
 import resolveCss from "resolve-css";
 import { isUrl } from "./utils";
-import pluginRules from "./plugin-rules";
+import { pluginRuleToObject } from "./plugin-rules";
 
 const cache = {
     request: {},
@@ -12,15 +12,15 @@ const cache = {
 };
 
 const readFile = (file) => fs.readFile(file, "utf8");
-
-const pluginImport = postcss.plugin(
-    "plugin-import",
-    /**
-     * @param {loaded} loaded
-     */
-    (loaded) => {
-        loaded = { imports: {}, process: {}, ...loaded };
-        return async (root, result) => {
+/**
+ * @param {loaded} loaded
+ * @return {import("postcss").Plugin}
+ */
+const pluginImport = (loaded) => {
+    loaded = { imports: {}, process: {}, ...loaded };
+    return {
+        postcssPlugin: "@uppercod/postcss-import",
+        Root: async (root, { result }) => {
             const file = result.opts.from;
 
             /**@type {Promise<void>[]} */
@@ -45,9 +45,10 @@ const pluginImport = postcss.plugin(
 
                 atrule.replaceWith(nodes.map((decl) => decl.clone()));
             });
-        };
-    }
-);
+        },
+    };
+};
+
 /**
  *
  * @param {string} file
@@ -134,12 +135,12 @@ const process = async (src, css, loaded) => {
     const context = {};
     const {
         root: { nodes },
-    } = await postcss([pluginImport(loaded), pluginRules(context)]).process(
-        css,
-        {
-            from: src,
-        }
-    );
+    } = await postcss([
+        pluginImport(loaded),
+        pluginRuleToObject(context),
+    ]).process(css, {
+        from: src,
+    });
 
     return { nodes, context };
 };
