@@ -72,6 +72,6 @@ special feature of this plugin that allows associating the import to a group, to
 
 .button {
     @extend bulma.button, bulma.is-dark;
-    @extend bulma`a button`;
+    @extend bulma"a button";
 }
 ```
