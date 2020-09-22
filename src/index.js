@@ -2,8 +2,7 @@ import path from "path";
 import fs from "fs/promises";
 import { request } from "@uppercod/request";
 import postcss from "postcss";
-import resolveCss from "resolve-css";
-import { isUrl } from "./utils";
+import { isUrl, resolveCss } from "./utils";
 import { pluginRuleToObject } from "./plugin-rules";
 
 const cache = {
