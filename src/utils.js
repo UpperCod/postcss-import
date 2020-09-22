@@ -10,12 +10,12 @@ const cache = createCache();
 export const isUrl = (file) => /^(http(s){0,1}:){0,1}\/\//.test(file);
 
 /**@type {resolve} */
-export const resolveCss = (read, src, dir) => {
+export const resolveCss = async (read, src, dir) => {
     let error;
     try {
         if (/^[^\@]/.test(src) && dir) {
             const file = path.join(dir, src);
-            return [file, read(file)];
+            return [file, await read(file)];
         }
     } catch (e) {
         error = e;
