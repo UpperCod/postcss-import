@@ -39,7 +39,19 @@ const pluginImport = (loaded) => {
             root.walkAtRules("extend", (atrule) => {
                 const nodes = atrule.params
                     .split(/\s*,\s*/)
-                    .map((index) => spaces[index] || [])
+                    .map((index) => {
+                        const testSpace = index.match(/^(\w+)(\.|\[|#)(.+)/);
+                        if (testSpace) {
+                            const [, space, start, next] = testSpace;
+                            return spaces[space][start + next] || [];
+                        }
+                        const testRaw = index.match(/^(\w+)"(.+)"$/);
+                        if (testRaw) {
+                            const [, space, select] = testRaw;
+                            return spaces[space][select] || [];
+                        }
+                        return [];
+                    })
                     .flat();
 
                 atrule.replaceWith(nodes.map((decl) => decl.clone()));
@@ -99,7 +111,8 @@ async function loadImport(file, loaded, atrule, spaces) {
 
     if (space) {
         for (const selector in context) {
-            spaces[space + selector] = context[selector];
+            if (!spaces[space]) spaces[space] = {};
+            spaces[space][selector] = context[selector];
         }
     } else {
         const nextNodes = nodes.map((node) => node.clone());
@@ -147,7 +160,7 @@ const process = async (src, css, loaded) => {
 export default pluginImport;
 
 /**
- * @typedef {Object<string,nodes>} context
+ * @typedef {Object<string,Object<string,nodes>>} context
  */
 
 /**
