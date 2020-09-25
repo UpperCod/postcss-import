@@ -1,7 +1,7 @@
 import test from "ava";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
-import pluginImport from "../src";
+import { pluginImport } from "../src";
 
 test("import url", async (t) => {
     const result1 = await postcss([pluginImport(), tailwindcss]).process(

@@ -17,7 +17,7 @@ npm install @uppercod/postcss-import
 
 ```js
 import postcss from "postcss";
-import pluginImport from "@uppercod/postcss-import";
+import { pluginImport } from "@uppercod/postcss-import";
 
 postcss([pluginImport()]).process(`@import "http://unpkg.com/example.css";`, {
     from: "example.css",
@@ -40,7 +40,30 @@ pluginImport({
      * Stores the paths of the local files imported by the process
      */
     imports: {},
+    /**
+     * Allows you to override the default module resolution process
+     * @param {string} id
+     * @param {string} importer
+     */
+    resolve(id, importer) {
+        return {
+            // module resolution id
+            id,
+            // read css
+            css: `.myCss{}`,
+            // skip the scan and add it to the top header as import
+            external: true,
+            // associate the import with a cache to avoid processing the content
+            cache: true,
+        };
+    },
 });
+```
+
+**You can customize the resolution and reuse the plugin resolver**, eg:
+
+```js
+import { pluginImport, resolve } from "@uppercod/postcss-import";
 ```
 
 ## Optimization

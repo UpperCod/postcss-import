@@ -1,7 +1,7 @@
 import test from "ava";
 import path from "path";
 import postcss from "postcss";
-import pluginImport from "../src";
+import { pluginImport } from "../src";
 import { readFile } from "fs/promises";
 
 test("import url", async (t) => {

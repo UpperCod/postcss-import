@@ -12,7 +12,7 @@ function insideAtrule(rule) {
  *  @return {import("postcss").Plugin}
  */
 
-export const pluginRuleToObject = (context = {}) => ({
+export const pluginRules = (context = {}) => ({
     postcssPlugin: "postcss-rules-to-object",
     Rule: (rule) => {
         if (insideAtrule(rule)) return;

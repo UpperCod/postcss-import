@@ -1,22 +1,18 @@
 import path from "path";
-import fs from "fs/promises";
-import { request } from "@uppercod/request";
 import postcss from "postcss";
-import { isUrl, resolveCss } from "./utils";
-import { pluginRuleToObject } from "./plugin-rules";
+import { isUrl } from "./utils";
+import { pluginRules } from "./plugin/rules";
+import { resolve } from "./resolve/resolve";
+export * from "./resolve/resolve";
+const cache = {};
 
-const cache = {
-    request: {},
-    process: {},
-};
-
-const readFile = (file) => fs.readFile(file, "utf8");
 /**
  * @param {loaded} loaded
  * @return {import("postcss").Plugin}
  */
-const pluginImport = (loaded) => {
-    loaded = { imports: {}, process: {}, ...loaded };
+export const pluginImport = (loaded) => {
+    loaded = { imports: {}, process: {}, resolve, ...loaded };
+
     return {
         postcssPlugin: "@uppercod/postcss-import",
         Root: async (root, { result }) => {
@@ -84,11 +80,14 @@ async function loadImport(file, loaded, atrule, spaces) {
     const space = testAs ? testAs[1] : "";
     const local = !isUrl(src);
 
-    if (local) {
-        [src, css] = await resolveCss(readFile, src, dir);
-    } else {
-        cache.request[src] = cache.request[src] || request(src);
-        [src, css] = await cache.request[src];
+    const resolveResult = await loaded.resolve(src, dir);
+
+    src = resolveResult.id;
+    css = resolveResult.css;
+
+    if (resolveResult.external) {
+        /**@todo insert import in header */
+        return;
     }
 
     let resolve;
@@ -98,9 +97,9 @@ async function loadImport(file, loaded, atrule, spaces) {
      * Execute a higher scope cache if the resource is static
      * whether it is from node_modules or a url
      */
-    if (!local || /node_modules/.test(src)) {
-        cache.process[src] = cache.process[src] || useProcess();
-        resolve = cache.process[src];
+    if (resolveResult.cache) {
+        cache[src] = cache[src] || useProcess();
+        resolve = cache[src];
     } else {
         loaded.process[src] = loaded.process[src] || useProcess();
         loaded.imports[src] = true;
@@ -147,17 +146,15 @@ const process = async (src, css, loaded) => {
     const context = {};
     const {
         root: { nodes },
-    } = await postcss([
-        pluginImport(loaded),
-        pluginRuleToObject(context),
-    ]).process(css, {
-        from: src,
-    });
+    } = await postcss([pluginImport(loaded), pluginRules(context)]).process(
+        css,
+        {
+            from: src,
+        }
+    );
 
     return { nodes, context };
 };
-
-export default pluginImport;
 
 /**
  * @typedef {Object<string,Object<string,nodes>>} context
@@ -175,6 +172,7 @@ export default pluginImport;
  * @typedef {Object} loaded
  * @property {Object<string,boolean>} imports - It allows to capture the executed local imports
  * @property {Object<string,process>} process - Cache local processes, the process object can be shared between multiple instances
+ * @property {import("./resolve/resolve").resolve} resolve - It allows to capture the executed local imports
  */
 
 /**

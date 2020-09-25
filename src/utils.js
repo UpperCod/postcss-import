@@ -1,40 +1,11 @@
-import path from "path";
-import createCache from "@uppercod/cache";
-
-const cache = createCache();
-
+import { readFile as fsReadFile } from "fs/promises";
 /**
  *
  * @param {string} file
  */
 export const isUrl = (file) => /^(http(s){0,1}:){0,1}\/\//.test(file);
 
-/**@type {resolve} */
-export const resolveCss = async (read, src, dir) => {
-    let error;
-    try {
-        if (/^[^\@]/.test(src) && dir) {
-            const file = path.join(dir, src);
-            return [file, await read(file)];
-        }
-    } catch (e) {
-        error = e;
-    }
-    if (/^[^\.]/.test(src)) {
-        return cache(requireResolve, [read, src]);
-    }
-    throw error;
-};
-
-/**@type {resolve} */
-const requireResolve = async (read, src) => {
-    const file = require.resolve(src);
-    return [file, await read(file)];
-};
-
 /**
- * @callback resolve
- * @param {(src:string)=>Promise<string>} read
- * @param {string} src
- * @param {string} dir
+ * @param {string} file
  */
+export const readFile = (file) => fsReadFile(file, "utf8");

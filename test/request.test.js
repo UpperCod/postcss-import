@@ -1,7 +1,7 @@
 import test from "ava";
 import postcss from "postcss";
 import { request } from "@uppercod/request";
-import pluginImport from "../src";
+import { pluginImport } from "../src";
 
 test("import url", async (t) => {
     const url =
