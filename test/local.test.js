@@ -25,7 +25,7 @@ test("import url and media", async (t) => {
         }
     );
     t.is(
-        (result + "").trim(),
+        result.css.trim(),
         `@media (max-width:320px) {${await readFile(
             path.join(__dirname, "./style/c.css"),
             "utf-8"

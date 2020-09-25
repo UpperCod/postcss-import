@@ -16,5 +16,5 @@ test("import url", async (t) => {
             from: "my.css",
         }
     );
-    t.deepEqual(result1 + "", result2 + "");
+    t.deepEqual(result1.css, result2 + "");
 });

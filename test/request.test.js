@@ -13,5 +13,5 @@ test("import url", async (t) => {
         }
     );
     const [, content] = await request(url);
-    t.is((result + "").trim(), content.trim());
+    t.is(result.css.trim(), content.trim());
 });

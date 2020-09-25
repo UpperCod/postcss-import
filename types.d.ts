@@ -20,11 +20,6 @@ declare module "@uppercod/postcss-import" {
         [file: string]: Promise<ProcessResponse>;
     }
 
-    export interface Options {
-        imports?: Imports;
-        process?: Process;
-    }
-
     export interface ResolveResult {
         /**
          * module path
@@ -44,10 +39,18 @@ declare module "@uppercod/postcss-import" {
         cache?: boolean;
     }
 
-    export function resolve(
+    export type Resolve = (
         id: string,
         importer: string
-    ): Promise<ResolveResult>;
+    ) => Promise<ResolveResult>;
+
+    export interface Options {
+        imports?: Imports;
+        process?: Process;
+        resolve?: Resolve;
+    }
+
+    export const resolve: Resolve;
 
     export function pluginImport(options?: Options): Plugin;
 }

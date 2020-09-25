@@ -87,6 +87,8 @@ async function loadImport(file, loaded, atrule, spaces) {
 
     if (resolveResult.external) {
         /**@todo insert import in header */
+        atrule.parent.prepend(atrule);
+        //atrule.remove();
         return;
     }
 
