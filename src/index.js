@@ -36,11 +36,21 @@ export const pluginImport = (loaded) => {
                 const nodes = atrule.params
                     .split(/\s*,\s*/)
                     .map((index) => {
+                        // export all space
+                        if (spaces[index]) {
+                            let nodes = [];
+                            for (const space in spaces[index]) {
+                                nodes = nodes.concat(spaces[index][space]);
+                            }
+                            return nodes;
+                        }
+                        // export query space
                         const testSpace = index.match(/^(\w+)(\.|\[|#)(.+)/);
                         if (testSpace) {
                             const [, space, start, next] = testSpace;
                             return spaces[space][start + next] || [];
                         }
+                        // export raw selector space
                         const testRaw = index.match(/^(\w+)"(.+)"$/);
                         if (testRaw) {
                             const [, space, select] = testRaw;
